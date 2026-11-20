@@ -1,0 +1,8 @@
+{
+  "name": "cc-cockpit-solitaire",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Solitaire: classic seven-column patience in a panel for cc-cockpit",
+  "license": "MIT",
+  "scripts": { "test": "node --test test/" }
+}

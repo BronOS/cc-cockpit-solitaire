@@ -1,0 +1,275 @@
+/* Solitaire panel. The page's frame, text and controls take the app's theme variables (ccc guide panels), so light and
+   dark themes and any plugin theme work. The felt and the cards have their own palette, one per theme kind through
+   light-dark() (the SDK sets `color-scheme` on :root to the theme's kind). No suit rests on its colour alone: every
+   face-up card prints its rank and its suit symbol in the corner and the symbol large. */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--cc-bg);
+  color: var(--cc-fg);
+  font: var(--cc-text-m) / 1.4 var(--cc-font-ui);
+}
+* {
+  box-sizing: border-box;
+}
+/* Plugin pages get no reset: a class rule with a display beats the hidden attribute (the empty size menu Mines
+   showed), so hidden always wins here. */
+[hidden] {
+  display: none !important;
+}
+
+:root {
+  /* The felt: a deep green in the dark, a brighter one on a light page; slots a step lighter than the felt. */
+  --s-felt: light-dark(#2e6a4f, #1d2a26);
+  --s-slot: light-dark(#3a7a5d, #2a3a35);
+  --s-slot-line: light-dark(#5d9c7e, #3c5149);
+  --s-slot-fg: light-dark(#bfe0cf, #6a877d);
+  /* Card faces: white on a light page, a touch softer in the dark so they do not glare. */
+  --s-face: light-dark(#ffffff, #eeeef1);
+  --s-face-line: light-dark(#aeb2bc, #c3c4cc);
+  --s-red: #c8213a;
+  --s-black: #1b1c21;
+  /* The four-colour deck: diamonds blue, clubs green, each still with its own symbol. */
+  --s-blue: #1d5fd0;
+  --s-green: #0f7a44;
+  --s-back-a: #3d4f9e;
+  --s-back-b: #4a5db0;
+  --s-back-line: #e8eaf6;
+  --s-lift: light-dark(rgba(20, 30, 25, 0.35), rgba(0, 0, 0, 0.55));
+  --s-ok: var(--cc-status-waiting);
+}
+
+.sol {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 200px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  min-height: 36px;
+  padding: var(--cc-space-1) var(--cc-space-3);
+  font-variant-numeric: tabular-nums;
+}
+.stat small {
+  color: var(--cc-fg-muted);
+  margin-right: 4px;
+}
+.grow {
+  flex: 1;
+}
+
+.felt {
+  position: relative;
+  flex: 1;
+  min-height: 160px;
+  margin: 0 var(--cc-space-2) var(--cc-space-2);
+  border-radius: 8px;
+  background: var(--s-felt);
+  /* Never a scrollbar: a long column closes up to fit (view.js columnOffsets), and a dragged card must not make the
+     felt scrollable (a scrollbar coming and going would shift the board under the drag). */
+  overflow: hidden;
+  outline: none;
+  user-select: none;
+  touch-action: none;
+}
+.felt:focus-visible {
+  box-shadow: 0 0 0 2px var(--cc-focus);
+}
+
+/* Everything on the felt is placed by solitaire.js in px (left, top, the card width as --cw). */
+.board {
+  position: relative;
+  --cw: 40px;
+  --ch: 56px;
+}
+
+.slot,
+.card {
+  position: absolute;
+  width: var(--cw);
+  height: var(--ch);
+  border-radius: max(4px, calc(var(--cw) * 0.1));
+}
+.slot {
+  background: var(--s-slot);
+  box-shadow: inset 0 0 0 1px var(--s-slot-line);
+  display: grid;
+  place-items: center;
+  color: var(--s-slot-fg);
+  font-size: calc(var(--cw) * 0.45);
+  line-height: 1;
+}
+.slot.col {
+  background: transparent;
+  font-size: calc(var(--cw) * 0.32);
+  font-weight: 700;
+}
+.slot.stock {
+  cursor: pointer;
+}
+.slot.drop {
+  box-shadow: inset 0 0 0 1px var(--s-slot-line), 0 0 0 3px var(--s-ok);
+}
+
+.card {
+  background: var(--s-face);
+  box-shadow: 0 1px 2px var(--s-lift), inset 0 0 0 1px var(--s-face-line);
+  transition:
+    left 0.14s ease-out,
+    top 0.14s ease-out,
+    translate 0.14s ease-out;
+}
+.card.up {
+  cursor: pointer;
+}
+.card.red {
+  color: var(--s-red);
+}
+.card.black {
+  color: var(--s-black);
+}
+.four .card.s-d {
+  color: var(--s-blue);
+}
+.four .card.s-c {
+  color: var(--s-green);
+}
+/* The corner: rank and suit side by side, so the strip a covered card shows always holds both. */
+.card .ix {
+  position: absolute;
+  left: max(2px, calc(var(--cw) * 0.07));
+  top: max(1px, calc(var(--cw) * 0.03));
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  font-weight: 800;
+  line-height: 1;
+  font-size: max(9px, calc(var(--cw) * 0.3));
+  letter-spacing: -0.02em;
+}
+.card .ix i {
+  font-style: normal;
+  font-size: 0.95em;
+}
+/* Under another card in the draw-3 fan only the left edge shows: the suit goes under the rank there. */
+.card.fanned .ix {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.card .pip {
+  position: absolute;
+  right: max(2px, calc(var(--cw) * 0.07));
+  bottom: max(1px, calc(var(--cw) * 0.04));
+  font-size: calc(var(--cw) * 0.5);
+  line-height: 1;
+}
+.card.down {
+  background: repeating-linear-gradient(45deg, var(--s-back-a) 0 4px, var(--s-back-b) 4px 8px);
+  box-shadow: inset 0 0 0 2px var(--s-back-line), 0 1px 2px var(--s-lift);
+}
+.card.stockcard {
+  cursor: pointer;
+}
+.card.drop {
+  box-shadow: 0 0 0 3px var(--s-ok), 0 2px 6px var(--s-lift);
+}
+.card.drag {
+  transition: none;
+  z-index: 200 !important;
+  box-shadow: 0 8px 18px var(--s-lift), inset 0 0 0 1px var(--s-face-line);
+}
+/* A card the state put somewhere new while it was being dragged (or a new deal) jumps there, no slide. */
+.card.instant,
+.board.instant .card {
+  transition: none;
+}
+.card.shake {
+  animation: shake 0.25s;
+}
+@keyframes shake {
+  25% {
+    translate: -3px 0;
+  }
+  75% {
+    translate: 3px 0;
+  }
+}
+/* The empty stock: a turn-over mark when the waste can go back, nothing to do when both are empty. */
+.slot.stock.empty::after {
+  content: '↻';
+  font-size: calc(var(--cw) * 0.5);
+}
+.slot.stock.spent::after {
+  content: '';
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+  .card.shake {
+    animation: none;
+    outline: 2px solid var(--cc-status-ended);
+  }
+}
+
+.felt .cc-empty {
+  position: absolute;
+  inset: 0;
+}
+
+.cover {
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--cc-bg) 90%, transparent);
+  border: 1px solid var(--cc-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cc-space-2);
+  text-align: center;
+  padding: var(--cc-space-3);
+}
+.cover .big {
+  font-size: var(--cc-text-l);
+  font-weight: 700;
+}
+.cover .what {
+  color: var(--cc-fg-muted);
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.cover .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cc-status-waiting);
+  display: inline-block;
+  margin-right: 6px;
+}
+.cover .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--cc-space-2);
+}
+
+.foot {
+  padding: 0 var(--cc-space-3) var(--cc-space-2);
+  color: var(--cc-fg-muted);
+  font-size: var(--cc-text-s);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--cc-space-1) var(--cc-space-3);
+}

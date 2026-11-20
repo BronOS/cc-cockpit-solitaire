@@ -1,0 +1,34 @@
+{
+  "id": "bronos.solitaire",
+  "name": "Solitaire",
+  "version": "0.1.0",
+  "api": 1,
+  "description": "Classic seven-column patience in a panel, to play while Claude works. It pauses when a Claude tab of the window finishes and waits for you. Reads only the window's tab statuses; never types into a session.",
+  "author": "Oleg Bronzov",
+  "license": "MIT",
+  "main": "dist/host.js",
+  "contributes": {
+    "panels": [
+      {
+        "id": "solitaire",
+        "title": "Solitaire",
+        "entry": "panels/solitaire.html",
+        "icon": "icons/solitaire.svg",
+        "defaultZone": "right"
+      }
+    ],
+    "settings": {
+      "app": {
+        "type": "object",
+        "properties": {
+          "fourColour": {
+            "type": "boolean",
+            "title": "Four-colour deck",
+            "description": "Diamonds blue and clubs green, so each suit has its own colour as well as its own symbol.",
+            "default": false
+          }
+        }
+      }
+    }
+  }
+}

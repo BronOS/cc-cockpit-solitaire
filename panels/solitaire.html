@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Solitaire</title>
+    <!-- CSP: scripts only from this plugin's own files, so the code is in ../lib/rules.js (the rules, shared with the
+         host), view.js (pure helpers) and solitaire.js (the drawing and the input). -->
+    <script src="../__sdk/panel.js"></script>
+    <link rel="stylesheet" href="solitaire.css" />
+    <script src="../lib/rules.js"></script>
+    <script src="view.js"></script>
+    <script src="solitaire.js" defer></script>
+  </head>
+  <body>
+    <div class="sol">
+      <div class="bar">
+        <span class="stat"><small>Moves</small><b id="moves">0</b></span>
+        <span class="stat"><small>Time</small><b id="time">0:00</b></span>
+        <span class="grow"></span>
+        <button type="button" id="finish" title="Send every card home" hidden>Finish</button>
+      </div>
+      <div class="felt" id="felt" tabindex="0" aria-label="Solitaire: tap a card to send it where it fits, drag it to choose; Space draws, U undoes, N new game">
+        <div class="board" id="board"></div>
+        <div class="cc-empty" id="loading"><span class="cc-spinner"></span></div>
+        <div class="cover" id="cover" hidden></div>
+      </div>
+      <div class="foot"><span>Tap: best place · drag: you choose</span><span>Space draws · U undoes</span></div>
+    </div>
+  </body>
+</html>
